@@ -19,12 +19,11 @@ Covered:
             trufflehog, shhgit, jsluice, gitleaks
   Git     : SecretFinder, DumpsterDiver  (cloned to .tools/)
   Rust    : findomain
-  Zips    : dns/brute-files/*.zip → extracted wordlists
 
 Manual (unverified repo):
   crtmon
 
-Data dependencies (not installed here):
+Data dependencies (checked by --check, not installed):
   dns/brute-files/*.txt
   wordlist/{vhost,subdomain,parameter}/*.txt
   attack/nuclei/nuclei-public.yaml
@@ -39,7 +38,6 @@ Usage:
   python3 install/setup.py --cargo-tools      # rust tools only
   python3 install/setup.py --git-tools        # git clones only
   python3 install/setup.py --playwright       # playwright browsers only
-  python3 install/setup.py --unzip            # extract brute-files zips only
   python3 install/setup.py --update           # force upgrade / reinstall
 """
 
@@ -48,7 +46,6 @@ import os
 import shutil
 import subprocess
 import sys
-import zipfile
 from pathlib import Path
 
 
@@ -68,7 +65,6 @@ NOTIFICATIONS_FILE = BASE_DIR / "configs" / "notifications.json"
 RESOLVERS_FILE = BASE_DIR / "dns" / "brute-files" / "resolvers.txt"
 NUCLEI_CONFIG = BASE_DIR / "attack" / "nuclei" / "nuclei-public.yaml"
 TOOLS_DIR = BASE_DIR / ".tools"
-ZIP_DIR = BASE_DIR / "dns" / "brute-files"
 
 
 # =========================
@@ -349,59 +345,6 @@ def install_git_tools(force=False):
 
 
 # =========================
-# Brute-files unzip
-# =========================
-
-def unzip_brute_files(force=False):
-    """Extract wordlists from dns/brute-files/*.zip.
-
-    Skips members that already exist unless force=True. Rejects any
-    member with absolute or parent-traversal paths (zip-slip defense).
-    """
-    if not ZIP_DIR.exists():
-        dim(f"  {ZIP_DIR} does not exist, skipping")
-        return True
-
-    zips = sorted(ZIP_DIR.glob("*.zip"))
-    if not zips:
-        dim("  no zip files found in dns/brute-files/")
-        return True
-
-    all_ok = True
-    for zf in zips:
-        info(f"  extracting {zf.name} ({zf.stat().st_size // (1024 * 1024)} MB)")
-        try:
-            with zipfile.ZipFile(zf, "r") as z:
-                for member in z.namelist():
-                    if member.endswith("/"):
-                        continue
-
-                    # Zip-slip defense
-                    mp = Path(member)
-                    if mp.is_absolute() or ".." in mp.parts:
-                        warn(f"    skip unsafe path: {member}")
-                        continue
-
-                    target = ZIP_DIR / member
-                    if target.exists() and not force:
-                        dim(f"    {member}: exists (use --update to overwrite)")
-                        continue
-
-                    z.extract(member, ZIP_DIR)
-                    size_mb = target.stat().st_size / (1024 * 1024)
-                    ok(f"    {member} ({size_mb:.1f} MB)")
-
-        except zipfile.BadZipFile:
-            err(f"  {zf.name}: corrupted zip")
-            all_ok = False
-        except Exception as e:
-            err(f"  {zf.name}: {e}")
-            all_ok = False
-
-    return all_ok
-
-
-# =========================
 # Status reporting
 # =========================
 
@@ -533,29 +476,6 @@ def show_git_status():
             warn(f"  {name}: missing")
 
 
-def show_zip_status():
-    info("\n[Brute-files zips]")
-    if not ZIP_DIR.exists():
-        warn(f"  {ZIP_DIR}: missing")
-        return
-    zips = sorted(ZIP_DIR.glob("*.zip"))
-    if not zips:
-        dim("  no zip files found")
-        return
-    for zf in zips:
-        size_mb = zf.stat().st_size / (1024 * 1024)
-        try:
-            with zipfile.ZipFile(zf, "r") as z:
-                members = [m for m in z.namelist() if not m.endswith("/")]
-                ok(f"  {zf.name} ({size_mb:.1f} MB) — {len(members)} file(s)")
-                for m in members:
-                    extracted = (ZIP_DIR / m).exists()
-                    mark = ok if extracted else dim
-                    mark(f"    {m}: {'extracted' if extracted else 'not extracted'}")
-        except zipfile.BadZipFile:
-            err(f"  {zf.name}: corrupted")
-
-
 def show_cargo_status():
     info("\n[Rust]")
     if not has_binary("cargo"):
@@ -673,8 +593,6 @@ def main():
                    help="clone git-based tools into .tools/")
     p.add_argument("--playwright", action="store_true",
                    help="install playwright browsers only")
-    p.add_argument("--unzip", action="store_true",
-                   help="extract dns/brute-files/*.zip only")
     p.add_argument("--update", action="store_true",
                    help="force upgrade / reinstall")
     a = p.parse_args()
@@ -692,19 +610,16 @@ def main():
         show_data_status()
         show_go_status()
         show_git_status()
-        show_zip_status()
         show_cargo_status()
         show_manual_status()
         return 0
 
-    only = (a.python or a.go_tools or a.cargo_tools
-            or a.playwright or a.git_tools or a.unzip)
+    only = a.python or a.go_tools or a.cargo_tools or a.playwright or a.git_tools
     do_python = a.python or not only
     do_go = a.go_tools or not only
     do_cargo = a.cargo_tools or not only
     do_git = a.git_tools or not only
     do_pw = a.playwright or not only
-    do_unzip = a.unzip or not only
 
     if do_python:
         show_python_status()
@@ -725,11 +640,6 @@ def main():
     if do_git:
         if not install_git_tools(force=a.update):
             warn("  some git tools failed — secret scanners may not work")
-
-    if do_unzip:
-        info("\n[Extracting brute-force wordlists]")
-        if not unzip_brute_files(force=a.update):
-            warn("  some zips failed to extract — check them manually")
 
     if do_cargo:
         show_cargo_status()
