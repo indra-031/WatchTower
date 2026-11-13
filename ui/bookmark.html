@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bookmarks — WatchTower</title>
+  <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
+  <link rel="stylesheet" href="/static/css/main.css">
+  <style>
+    /* Page-specific styles */
+    .type-tag-live  { background: rgba(88, 166, 255, 0.12); color: var(--blue); }
+    .type-tag-whois { background: rgba(255, 214, 0, 0.14);  color: #ffd600; }
+
+    .bm-notes {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text);
+      padding: 5px 8px;
+      border-radius: var(--r-sm);
+      font-size: 0.85em;
+      font-family: inherit;
+      width: 100%;
+      min-width: 160px;
+      transition: border-color var(--t-fast), background var(--t-fast);
+    }
+    .bm-notes::placeholder { color: var(--faint); font-style: italic; }
+    .bm-notes:hover        { border-color: var(--border); }
+    .bm-notes:focus {
+      outline: none;
+      border-color: var(--blue);
+      background: var(--bg-0);
+    }
+
+    .bm-del {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      width: 28px;
+      height: 28px;
+      border-radius: var(--r-sm);
+      font-size: 0.95em;
+      line-height: 1;
+      cursor: pointer;
+      transition: all var(--t-fast);
+    }
+    .bm-del:hover {
+      border-color: var(--red);
+      color: var(--red);
+      background: rgba(248, 81, 73, 0.08);
+    }
+
+    .bm-target-link {
+      font-family: var(--font-mono);
+      color: var(--blue-dim);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .bm-target-link:hover { color: var(--blue); text-decoration: underline; }
+
+    .toolbar-actions { display: flex; gap: 8px; margin-left: auto; }
+    .toolbar-actions button {
+      background: var(--bg-0);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 7px 14px;
+      border-radius: var(--r-sm);
+      font-size: 0.85em;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all var(--t-fast);
+    }
+    .toolbar-actions button:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+      background: rgba(88, 166, 255, 0.05);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="/" class="brand">
+        <svg class="brand-logo" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="brand-g" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#58a6ff"/>
+              <stop offset="1" stop-color="#bc8cff"/>
+            </linearGradient>
+          </defs>
+          <path d="M32 4 L56 14 L56 34 C56 48 44 58 32 62 C20 58 8 48 8 34 L8 14 Z"
+                stroke="url(#brand-g)" stroke-width="3" fill="none" stroke-linejoin="round"/>
+          <rect x="26" y="28" width="12" height="20" rx="2"
+                stroke="url(#brand-g)" stroke-width="3" fill="none"/>
+          <path d="M22 28 L42 28 L38 20 L26 20 Z"
+                stroke="url(#brand-g)" stroke-width="3" fill="none" stroke-linejoin="round"/>
+          <path d="M32 20 L32 12" stroke="url(#brand-g)" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="32" cy="10" r="2" fill="url(#brand-g)"/>
+        </svg>
+        <span class="brand-name">WatchTower</span>
+      </a>
+      <nav class="header-nav">
+        <a href="/programs">Programs</a>
+        <a href="/subdomains">Subdomains</a>
+        <a href="/cdn">CDN</a>
+        <a href="/portscan">Ports</a>
+        <a href="/attack">Attack</a>
+        <a href="/bookmark">Bookmarks</a>
+        <a href="/help">Help</a>
+      </nav>
+      <div class="header-actions">
+        <span class="version-badge">v1.2</span>
+        <span class="live-dot" title="Live"></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <div class="page-header">
+      <div class="page-title-group">
+        <a href="/" class="back-link">← Back to Dashboard</a>
+        <h1 class="page-title">
+          🔖 Bookmarks
+          <span class="page-count-badge" id="bookmark-count">0</span>
+        </h1>
+        <p class="page-subtitle">
+          Manually curated targets across all programs. Add a bookmark from any list page by clicking the ☆ star.
+        </p>
+      </div>
+    </div>
+
+    <!-- Mini stats -->
+    <div class="mini-stats" id="mini-stats">
+      <div class="mini-stat" data-type="all" style="cursor:pointer">
+        <span class="mini-stat-value" id="stat-all" style="color:var(--text-strong)">0</span>
+        <span class="mini-stat-label">Total</span>
+      </div>
+      <div class="mini-stat" data-type="subdomain" style="cursor:pointer">
+        <span class="mini-stat-value" id="stat-subdomain" style="color:var(--blue)">0</span>
+        <span class="mini-stat-label">Subdomains</span>
+      </div>
+      <div class="mini-stat" data-type="live" style="cursor:pointer">
+        <span class="mini-stat-value" id="stat-live" style="color:var(--blue-dim)">0</span>
+        <span class="mini-stat-label">Live</span>
+      </div>
+      <div class="mini-stat" data-type="http" style="cursor:pointer">
+        <span class="mini-stat-value" id="stat-http" style="color:var(--green)">0</span>
+        <span class="mini-stat-label">HTTP</span>
+      </div>
+      <div class="mini-stat" data-type="nuclei" style="cursor:pointer">
+        <span class="mini-stat-value" id="stat-nuclei" style="color:#ff7b72">0</span>
+        <span class="mini-stat-label">Nuclei</span>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="filter-pills" id="type-pills">
+        <button class="filter-pill active" data-type="all">All</button>
+        <button class="filter-pill" data-type="subdomain">Subdomain</button>
+        <button class="filter-pill" data-type="live">Live</button>
+        <button class="filter-pill" data-type="http">HTTP</button>
+        <button class="filter-pill" data-type="cdn">CDN</button>
+        <button class="filter-pill" data-type="vhost">VHost</button>
+        <button class="filter-pill" data-type="portscan">Portscan</button>
+        <button class="filter-pill" data-type="whois">WHOIS</button>
+        <button class="filter-pill" data-type="nuclei">Nuclei</button>
+      </div>
+
+      <div class="toolbar-spacer"></div>
+
+      <div class="toolbar-group">
+        <span class="toolbar-label">Program</span>
+        <select id="program-filter">
+          <option value="all">All programs</option>
+        </select>
+      </div>
+
+      <input type="text" class="toolbar-search" id="search-input" placeholder="Search target, program, note…">
+
+      <div class="toolbar-actions">
+        <button type="button" id="export-btn">⬇ Export</button>
+        <button type="button" id="import-btn">⬆ Import</button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrapper">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="sortable" data-sort="type">Type <span class="sort-arrow">↕</span></th>
+              <th class="sortable" data-sort="target">Target <span class="sort-arrow active">↑</span></th>
+              <th class="sortable" data-sort="program">Program <span class="sort-arrow">↕</span></th>
+              <th>Note</th>
+              <th class="sortable" data-sort="added">Added <span class="sort-arrow">↕</span></th>
+              <th style="width:52px"></th>
+            </tr>
+          </thead>
+          <tbody id="bookmark-tbody">
+            <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted)">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="pagination-container"></div>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>WatchTower &copy; 2026 — Automated Reconnaissance Dashboard</p>
+    </div>
+  </footer>
+
+  <input type="file" id="import-input" accept=".json,application/json" hidden>
+
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/bookmark.js"></script>
+</body>
+</html>

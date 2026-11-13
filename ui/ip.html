@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IP Enrichment — WatchTower</title>
+  <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
+  <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="/" class="brand">
+        <svg class="brand-logo" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="brand-g" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#58a6ff"/>
+              <stop offset="1" stop-color="#bc8cff"/>
+            </linearGradient>
+          </defs>
+          <path d="M32 4 L56 14 L56 34 C56 48 44 58 32 62 C20 58 8 48 8 34 L8 14 Z"
+                stroke="url(#brand-g)" stroke-width="3" fill="none" stroke-linejoin="round"/>
+          <rect x="26" y="28" width="12" height="20" rx="2"
+                stroke="url(#brand-g)" stroke-width="3" fill="none"/>
+          <path d="M22 28 L42 28 L38 20 L26 20 Z"
+                stroke="url(#brand-g)" stroke-width="3" fill="none" stroke-linejoin="round"/>
+          <path d="M32 20 L32 12" stroke="url(#brand-g)" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="32" cy="10" r="2" fill="url(#brand-g)"/>
+        </svg>
+        <span class="brand-name">WatchTower</span>
+      </a>
+      <nav class="header-nav">
+        <a href="/programs">Programs</a>
+        <a href="/subdomains">Subdomains</a>
+        <a href="/bruteforce">Bruteforce</a>
+        <a href="/out-of-scope">Out-of-Scope</a>
+        <a href="/cdn">CDN</a>
+        <a href="/portscan">Ports</a>
+        <a href="/attack">Attack</a>
+        <a href="/works">Works</a>
+        <a href="/help">Help</a>
+      </nav>
+      <div class="header-actions">
+        <span class="version-badge">v1.3</span>
+        <span class="live-dot" title="Live"></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <div class="page-header">
+      <div class="page-title-group">
+        <a href="/" class="back-link">← Back to Dashboard</a>
+        <h1 class="page-title">
+          🌐 IP Enrichment
+          <span class="page-count-badge" id="ip-count">—</span>
+        </h1>
+        <p class="page-subtitle">
+          Single IPs from <code>program.json:ip</code> with reverse DNS and ASN enrichment.
+        </p>
+      </div>
+    </div>
+
+    <div class="mini-stats" id="mini-stats">
+      <div class="mini-stat" data-version="all" style="cursor:pointer">
+        <span class="mini-stat-value" id="stat-total" style="color:var(--text-strong)">0</span>
+        <span class="mini-stat-label">Total</span>
+      </div>
+      <div class="mini-stat" data-version="v4" style="cursor:pointer">
+        <span class="mini-stat-value" id="stat-v4" style="color:var(--blue)">0</span>
+        <span class="mini-stat-label">IPv4</span>
+      </div>
+      <div class="mini-stat" data-version="v6" style="cursor:pointer">
+        <span class="mini-stat-value" id="stat-v6" style="color:var(--purple)">0</span>
+        <span class="mini-stat-label">IPv6</span>
+      </div>
+      <div class="mini-stat" data-version="with-asn" style="cursor:pointer">
+        <span class="mini-stat-value" id="stat-with-asn" style="color:var(--yellow)">0</span>
+        <span class="mini-stat-label">With ASN</span>
+      </div>
+      <div class="mini-stat" data-version="with-rdns" style="cursor:pointer">
+        <span class="mini-stat-value" id="stat-with-rdns" style="color:var(--green)">0</span>
+        <span class="mini-stat-label">With rDNS</span>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="filter-pills" id="version-pills">
+        <button class="filter-pill active" data-version="all">All</button>
+        <button class="filter-pill" data-version="v4">IPv4</button>
+        <button class="filter-pill" data-version="v6">IPv6</button>
+        <button class="filter-pill" data-version="with-asn">With ASN</button>
+        <button class="filter-pill" data-version="with-rdns">With rDNS</button>
+      </div>
+      <div class="toolbar-spacer"></div>
+      <div class="toolbar-group">
+        <span class="toolbar-label">Program</span>
+        <select id="program-filter">
+          <option value="all">All programs</option>
+        </select>
+      </div>
+      <input type="text" class="toolbar-search" id="search-input" placeholder="Search IP, rDNS, ASN, country…">
+    </div>
+
+    <div class="table-wrapper">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="sortable" data-sort="ip">IP <span class="sort-arrow active">↑</span></th>
+              <th>Version</th>
+              <th class="sortable" data-sort="program">Program <span class="sort-arrow">↕</span></th>
+              <th>rDNS</th>
+              <th>ASN</th>
+              <th>AS Name</th>
+              <th>Country</th>
+              <th class="sortable" data-sort="last_seen">Last Seen <span class="sort-arrow">↕</span></th>
+              <th style="width:40px"></th>
+            </tr>
+          </thead>
+          <tbody id="ip-tbody">
+            <tr><td colspan="9" style="text-align:center;padding:32px;color:var(--muted)">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="pagination-container"></div>
+
+  </main>
+
+  <div class="modal" id="ip-modal">
+    <div class="modal-content" style="max-width:640px;background:var(--bg-1);border:1px solid var(--border);border-radius:var(--r-lg);padding:var(--sp-5);position:relative;max-height:90vh;overflow-y:auto">
+      <button class="modal-close" id="ip-modal-close" style="position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;background:var(--bg-2);border:1px solid var(--border);color:var(--text);font-size:1.2em;cursor:pointer">×</button>
+      <div id="ip-modal-body"></div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>WatchTower &copy; 2026 — Automated Reconnaissance Dashboard</p>
+    </div>
+  </footer>
+
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/ip.js"></script>
+</body>
+</html>

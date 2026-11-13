@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Help — WatchTower</title>
+  <meta name="description" content="Complete guide to the WatchTower reconnaissance pipeline.">
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='64' y2='64'%3E%3Cstop offset='0' stop-color='%2358a6ff'/%3E%3Cstop offset='1' stop-color='%23bc8cff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M32 4 L56 14 L56 34 C56 48 44 58 32 62 C20 58 8 48 8 34 L8 14 Z' stroke='url(%23g)' stroke-width='3' fill='none'/%3E%3C/svg%3E">
+
+  <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="/" class="brand">
+        <svg class="brand-logo" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="brand-g" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#58a6ff"/>
+              <stop offset="1" stop-color="#bc8cff"/>
+            </linearGradient>
+          </defs>
+          <path d="M32 4 L56 14 L56 34 C56 48 44 58 32 62 C20 58 8 48 8 34 L8 14 Z"
+                stroke="url(#brand-g)" stroke-width="3" fill="none" stroke-linejoin="round"/>
+          <rect x="26" y="28" width="12" height="20" rx="2"
+                stroke="url(#brand-g)" stroke-width="3" fill="none"/>
+          <path d="M22 28 L42 28 L38 20 L26 20 Z"
+                stroke="url(#brand-g)" stroke-width="3" fill="none" stroke-linejoin="round"/>
+          <path d="M32 20 L32 12" stroke="url(#brand-g)" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="32" cy="10" r="2" fill="url(#brand-g)"/>
+        </svg>
+        <span class="brand-name">WatchTower</span>
+      </a>
+
+      <nav class="header-nav">
+        <a href="/programs">Programs</a>
+        <a href="/cdn">CDN</a>
+        <a href="/portscan">Ports</a>
+        <a href="/screenshots">Screenshots</a>
+        <a href="/nuclei">Nuclei</a>
+        <a href="/help">Help</a>
+      </nav>
+
+      <div class="header-actions">
+        <span class="version-badge">v1.0</span>
+        <span class="live-dot" title="Live"></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <div class="page-header">
+      <div class="page-title-group">
+        <a href="/" class="back-link">← Dashboard</a>
+        <h1 class="page-title">❓ Help</h1>
+        <p class="page-subtitle">
+          Complete guide to the WatchTower reconnaissance pipeline
+        </p>
+      </div>
+    </div>
+
+    <div class="docs-layout">
+
+      <!-- ============ SIDEBAR ============ -->
+      <aside class="docs-sidebar">
+        <div class="docs-nav-title">On this page</div>
+        <ul class="docs-nav">
+          <li><a href="#overview">Overview</a></li>
+          <li><a href="#quick-start">Quick Start</a></li>
+          <li><a href="#pipeline">Pipeline</a></li>
+          <li><a href="#modules">Modules</a></li>
+          <li class="sub"><a href="#mod-enum">Enumeration</a></li>
+          <li class="sub"><a href="#mod-dns">DNS</a></li>
+          <li class="sub"><a href="#mod-http">HTTP</a></li>
+          <li class="sub"><a href="#mod-cdn">CDN / WAF</a></li>
+          <li class="sub"><a href="#mod-portscan">Port Scan</a></li>
+          <li class="sub"><a href="#mod-vhost">VHost</a></li>
+          <li class="sub"><a href="#mod-whois">WHOIS / RDAP</a></li>
+          <li class="sub"><a href="#mod-screenshot">Screenshots</a></li>
+          <li class="sub"><a href="#mod-nuclei">Nuclei</a></li>
+          <li><a href="#api">REST API</a></li>
+          <li><a href="#structure">Directory Structure</a></li>
+          <li><a href="#config">Configuration</a></li>
+          <li><a href="#troubleshooting">Troubleshooting</a></li>
+        </ul>
+      </aside>
+
+      <!-- ============ CONTENT ============ -->
+      <div class="docs-content">
+
+        <div class="doc-search-wrap">
+          <input id="doc-search" class="doc-search" type="text"
+                 placeholder="Search this page (e.g. nuclei, port, cdncheck)…" autocomplete="off">
+        </div>
+
+        <div class="no-results doc-no-results" id="doc-no-results">
+          No sections match your search.
+        </div>
+
+        <!-- OVERVIEW -->
+        <section class="doc-section" id="overview">
+          <h2>Overview</h2>
+          <p>
+            <strong>WatchTower</strong> is a modular attack-surface reconnaissance pipeline.
+            Every stage is a standalone Python script that reads JSON from
+            <code>database/&lt;program&gt;/</code> and writes JSON back to the same place.
+            No external database, no migrations — just files on disk.
+          </p>
+          <p>
+            Modules can be run individually, chained in <code>watch.sh</code>, or driven by
+            the Flask dashboard in <code>app.py</code>. All output is also accessible
+            via the REST API under <code>/api/*</code>.
+          </p>
+
+          <div class="doc-callout doc-callout-info">
+            <p>
+              <strong>Design philosophy:</strong> each script does one thing, fails gracefully,
+              and its state is visible as a plain JSON file. You can <code>cat</code>,
+              <code>jq</code>, or <code>grep</code> anything.
+            </p>
+          </div>
+        </section>
+
+        <!-- QUICK START -->
+        <section class="doc-section" id="quick-start">
+          <h2>Quick Start</h2>
+
+          <h3>1. Sync programs</h3>
+          <p>Define your targets in <code>programs/*.json</code>, then sync to the database:</p>
+          <div class="doc-code-header">
+            <span>bash</span>
+            <button class="doc-code-copy" data-target="#code-qstart-1">Copy</button>
+          </div>
+          <pre class="doc-code" id="code-qstart-1"><code>python3 programs/watch_sync_programs.py</code></pre>
+
+          <h3>2. Run the full pipeline</h3>
+          <div class="doc-code-header">
+            <span>bash</span>
+            <button class="doc-code-copy" data-target="#code-qstart-2">Copy</button>
+          </div>
+          <pre class="doc-code" id="code-qstart-2"><code>bash watch.sh</code></pre>
+          <p>
+            This runs all enabled stages in order. Each run creates a new log under
+            <code>database/&lt;program&gt;/log/</code>. A lock file (<code>run.lock</code>)
+            prevents concurrent runs.
+          </p>
+
+          <h3>3. Open the dashboard</h3>
+          <div class="doc-code-header">
+            <span>bash</span>
+            <button class="doc-code-copy" data-target="#code-qstart-3">Copy</button>
+          </div>
+          <pre class="doc-code" id="code-qstart-3"><code>python3 app.py
+# → http://localhost:5000</code></pre>
+        </section>
+
+        <!-- PIPELINE -->
+        <section class="doc-section" id="pipeline">
+          <h2>Pipeline</h2>
+          <p>Each stage is independent. You can run any stage manually.</p>
+
+          <div class="doc-table-wrapper">
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Stage</th>
+                  <th>Script</th>
+                  <th>Reads</th>
+                  <th>Writes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td>Sync</td>
+                  <td><code>programs/watch_sync_programs.py</code></td>
+                  <td><code>programs/*.json</code></td>
+                  <td><code>database/&lt;p&gt;/program.json</code></td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>Enum</td>
+                  <td><code>enumeration/watch_enum_all.py</code></td>
+                  <td><code>program.json</code></td>
+                  <td><code>enum-output/*.json</code></td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>Wildcard</td>
+                  <td><code>dns/wildcard/watch_wildcard_ns_test_all.py</code></td>
+                  <td><code>program.json</code></td>
+                  <td><code>dns/wildcard-test.json</code></td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td>Wordlist</td>
+                  <td><code>utils/watch_wordlist_all.py</code></td>
+                  <td><code>enum-output/</code></td>
+                  <td><code>wordlist/</code></td>
+                </tr>
+                <tr>
+                  <td>5</td>
+                  <td>DNS</td>
+                  <td><code>dns/watch_ns_all.py</code></td>
+                  <td><code>enum-output/</code></td>
+                  <td><code>dns/lives.json</code></td>
+                </tr>
+                <tr>
+                  <td>6</td>
+                  <td>Filter IPs</td>
+                  <td><code>dns/watch_filter_privates_ip_all.py</code></td>
+                  <td><code>dns/lives.json</code></td>
+                  <td><code>dns/lives.json</code></td>
+                </tr>
+                <tr>
+                  <td>7</td>
+                  <td>HTTP</td>
+                  <td><code>http/watch_httpx_all.py</code></td>
+                  <td><code>dns/lives.json</code></td>
+                  <td><code>http/lives-http.json</code></td>
+                </tr>
+                <tr>
+                  <td>8</td>
+                  <td>CDN</td>
+                  <td><code>cdn/watch_cdn_all.py</code></td>
+                  <td><code>dns/lives.json</code></td>
+                  <td><code>cdn/lives-cdn.json</code></td>
+                </tr>
+                <tr>
+                  <td>9</td>
+                  <td>Ports</td>
+                  <td><code>portscan/watch_portscan_all.py</code></td>
+                  <td><code>http/lives-http.json</code></td>
+                  <td><code>portscan/lives-portscan.json</code></td>
+                </tr>
+                <tr>
+                  <td>10</td>
+                  <td>VHost</td>
+                  <td><code>vhost/watch_vhost_all.py</code></td>
+                  <td><code>http/lives-http.json</code></td>
+                  <td><code>vhost/lives-vhost.json</code></td>
+                </tr>
+                <tr>
+                  <td>11</td>
+                  <td>WHOIS</td>
+                  <td><code>whois/watch_whois_all.py</code></td>
+                  <td><code>dns/lives.json</code></td>
+                  <td><code>whois/lives-whois.json</code></td>
+                </tr>
+                <tr>
+                  <td>12</td>
+                  <td>Screenshots</td>
+                  <td><code>screenshot/watch_screenshot_all.py</code></td>
+                  <td><code>http/lives-http.json</code></td>
+                  <td><code>screenshots/*.png</code></td>
+                </tr>
+                <tr>
+                  <td>13</td>
+                  <td>Nuclei</td>
+                  <td><code>attack/nuclei/watch_nuclei_all.py</code></td>
+                  <td><code>nuclei/nuclei-urls.txt</code></td>
+                  <td><code>nuclei/nuclei-result.json</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- MODULES -->
+        <section class="doc-section" id="modules">
+          <h2>Modules</h2>
+
+          <!-- ENUM -->
+          <div id="mod-enum">
+            <h3>Enumeration <span class="doc-badge doc-badge-core">core</span></h3>
+            <p>
+              Passive subdomain discovery via 13 sources: subfinder, CRT.sh, Chaos, Wayback,
+              GAU, CRTmon, crt.name, AgniOps, Assetfinder, waymore, Findomain,
+              github-subdomains, and AbuseIPDB (reverse-IP). Results merged with per-source
+              attribution.
+            </p>
+            <div class="doc-code-header">
+              <span>bash</span>
+              <button class="doc-code-copy" data-target="#code-enum">Copy</button>
+            </div>
+            <pre class="doc-code" id="code-enum"><code>cd enumeration
+python3 watch_enum_all.py</code></pre>
+            <p>Output: <code>database/&lt;p&gt;/enum-output/all-subdomains.json</code></p>
+          </div>
+
+          <!-- DNS -->
+          <div id="mod-dns">
+            <h3>DNS Resolution <span class="doc-badge doc-badge-core">core</span></h3>
+            <p>
+              Wildcard test runs first (3 random probes). Then dnsx resolves every subdomain
+              to IPs. Reserved / private IPs are filtered out afterward.
+            </p>
+            <div class="doc-code-header">
+              <span>bash</span>
+              <button class="doc-code-copy" data-target="#code-dns">Copy</button>
+            </div>
+            <pre class="doc-code" id="code-dns"><code>cd dns
+python3 wildcard/watch_wildcard_ns_test_all.py
+python3 watch_ns_all.py
+python3 watch_filter_privates_ip_all.py</code></pre>
+            <p>Output: <code>database/&lt;p&gt;/dns/lives.json</code></p>
+            <div class="doc-callout doc-callout-warn">
+              <p>
+                <strong>Note:</strong> if a domain has wildcard DNS, brute-force stages
+                should use the <code>*_wildcard_all.py</code> variants which apply IP filtering.
+              </p>
+            </div>
+          </div>
+
+          <!-- HTTP -->
+          <div id="mod-http">
+            <h3>HTTP Probing <span class="doc-badge doc-badge-core">core</span></h3>
+            <p>
+              Runs httpx with TLS, favicon, and tech detection. Stores status, title,
+              technologies, and resolved IPs.
+            </p>
+            <div class="doc-code-header">
+              <span>bash</span>
+              <button class="doc-code-copy" data-target="#code-http">Copy</button>
+            </div>
+            <pre class="doc-code" id="code-http"><code>cd http
+python3 watch_httpx_all.py</code></pre>
+            <p>Output: <code>database/&lt;p&gt;/http/lives-http.json</code></p>
+          </div>
+
+          <!-- CDN -->
+          <div id="mod-cdn">
+            <h3>CDN / WAF Detection <span class="doc-badge doc-badge-new">new</span></h3>
+            <p>
+              Uses <code>cdncheck</code> (ProjectDiscovery) to classify each IP as
+              CDN, Cloud, WAF, or direct. Auto-updates once per process, falls back to
+              built-in ranges if GitHub is unreachable.
+            </p>
+            <div class="doc-code-header">
+              <span>bash</span>
+              <button class="doc-code-copy" data-target="#code-cdn">Copy</button>
+            </div>
+            <pre class="doc-code" id="code-cdn"><code>cd cdn
+python3 watch_cdn_all.py</code></pre>
+            <p>Output: <code>database/&lt;p&gt;/cdn/lives-cdn.json</code></p>
+          </div>
+
+          <!-- PORTSCAN -->
+          <div id="mod-portscan">
+            <h3>Port Scan <span class="doc-badge doc-badge-core">core</span></h3>
+            <p>
+              Non-CDN hosts get a SYN scan over ~22 common ports. CDN hosts get a CONNECT
+              scan over only the ports their CDN actually forwards to origin
+              (Cloudflare 12, Akamai 19, CloudFront 80+443+1024-65535, Fastly/Bunny 2).
+            </p>
+            <div class="doc-code-header">
+              <span>bash</span>
+              <button class="doc-code-copy" data-target="#code-portscan">Copy</button>
+            </div>
+            <pre class="doc-code" id="code-portscan"><code>cd portscan
+python3 watch_portscan_all.py --fresh</code></pre>
+            <p>Output: <code>database/&lt;p&gt;/portscan/lives-portscan.json</code></p>
+          </div>
+
+          <!-- VHOST -->
+          <div id="mod-vhost">
+            <h3>Virtual Hosts <span class="doc-badge doc-badge-new">new</span></h3>
+            <p>
+              For non-CDN, public-IP hosts only: baseline with a random Host header,
+              then fuzz with static wordlist + all known subdomains. Already-tested
+              (host, ip) pairs are skipped unless <code>--force</code>.
+            </p>
+            <div class="doc-code-header">
+              <span>bash</span>
+              <button class="doc-code-copy" data-target="#code-vhost">Copy</button>
+            </div>
+            <pre class="doc-code" id="code-vhost"><code>cd vhost
+python3 watch_vhost_all.py
+# adhoc test against a specific IP:
+python3 watch_vhost.py 1.2.3.4 --limit 100 --workers 10</code></pre>
+            <p>Output: <code>database/&lt;p&gt;/vhost/lives-vhost.json</code></p>
+          </div>
+
+          <!-- WHOIS -->
+          <div id="mod-whois">
+            <h3>WHOIS / RDAP <span class="doc-badge doc-badge-core">core</span></h3>
+            <p>
+              Queries RDAP (the modern replacement for WHOIS) for each domain and IP.
+              Handles 404, 429, 5xx gracefully. Never re-queries a target unless
+              <code>--force</code>.
+            </p>
+            <div class="doc-code-header">
+              <span>bash</span>
+              <button class="doc-code-copy" data-target="#code-whois">Copy</button>
+            </div>
+            <pre class="doc-code" id="code-whois"><code>cd whois
+python3 watch_whois_all.py</code></pre>
+            <p>Output: <code>database/&lt;p&gt;/whois/lives-whois.json</code></p>
+          </div>
+
+          <!-- SCREENSHOT -->
+          <div id="mod-screenshot">
+            <h3>Screenshots <span class="doc-badge doc-badge-core">core</span></h3>
+            <p>
+              Playwright (Chromium) captures a full-page PNG for each HTTP service.
+              Falls back to HTTP if HTTPS fails. Skips already-captured screenshots
+              unless <code>--force</code>.
+            </p>
+            <div class="doc-code-header">
+              <span>bash</span>
+              <button class="doc-code-copy" data-target="#code-screenshot">Copy</button>
+            </div>
+            <pre class="doc-code" id="code-screenshot"><code>cd screenshot
+python3 watch_screenshot_all.py --fresh</code></pre>
+            <p>Output: <code>database/&lt;p&gt;/screenshots/&lt;host&gt;.png</code></p>
+          </div>
+
+          <!-- NUCLEI -->
+          <div id="mod-nuclei">
+            <h3>Nuclei <span class="doc-badge doc-badge-attack">attack</span></h3>
+            <p>
+              Runs the Nuclei scanner against all live HTTP URLs. Only findings
+              with severity <code>critical</code>, <code>high</code>, <code>medium</code>,
+              or <code>low</code> are kept — <code>info</code> is dropped to reduce noise.
+            </p>
+            <div class="doc-code-header">
+              <span>bash</span>
+              <button class="doc-code-copy" data-target="#code-nuclei">Copy</button>
+            </div>
+            <pre class="doc-code" id="code-nuclei"><code>cd attack/nuclei
+python3 nuclei_url_maker.py --all
+python3 watch_nuclei_all.py --fresh</code></pre>
+            <p>Output: <code>database/&lt;p&gt;/nuclei/nuclei-result.json</code></p>
+          </div>
+        </section>
+
+        <!-- API -->
+        <section class="doc-section" id="api">
+          <h2>REST API</h2>
+          <p>
+            All <code>/api/*</code> routes return JSON. HTML routes are at the root.
+            An <code>after_request</code> guard ensures nothing under <code>/api</code> ever
+            returns HTML.
+          </p>
+
+          <div class="doc-table-wrapper">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Endpoint</th><th>Description</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>GET /api/stats</code></td><td>Global + per-program statistics</td></tr>
+                <tr><td><code>GET /api/programs</code></td><td>All programs with scopes</td></tr>
+                <tr><td><code>GET /api/program/&lt;name&gt;</code></td><td>Single program details</td></tr>
+                <tr><td><code>GET /api/subdomains</code></td><td>All subdomains (add <code>?fresh=1</code>)</td></tr>
+                <tr><td><code>GET /api/subdomains/&lt;name&gt;</code></td><td>Subdomains for one program</td></tr>
+                <tr><td><code>GET /api/lives/&lt;name&gt;</code></td><td>Live hosts for one program</td></tr>
+                <tr><td><code>GET /api/http/&lt;name&gt;</code></td><td>HTTP services</td></tr>
+                <tr><td><code>GET /api/cdn/&lt;name&gt;</code></td><td>CDN/Cloud/WAF detection</td></tr>
+                <tr><td><code>GET /api/portscan/&lt;name&gt;</code></td><td>Open ports per host</td></tr>
+                <tr><td><code>GET /api/vhost/&lt;name&gt;</code></td><td>Discovered virtual hosts</td></tr>
+                <tr><td><code>GET /api/nuclei/&lt;name&gt;</code></td><td>Nuclei findings</td></tr>
+                <tr><td><code>GET /api/screenshots/&lt;name&gt;</code></td><td>Screenshot file list</td></tr>
+                <tr><td><code>GET /api/bruteforce/&lt;name&gt;</code></td><td>Brute-only subdomains</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- STRUCTURE -->
+        <section class="doc-section" id="structure">
+          <h2>Directory Structure</h2>
+          <div class="doc-code-header">
+            <span>tree</span>
+            <button class="doc-code-copy" data-target="#code-structure">Copy</button>
+          </div>
+          <pre class="doc-code" id="code-structure"><code>Watch-Tower/
+├── app.py                    Flask UI + API
+├── watch.sh                  Pipeline runner
+├── configs/                  Shared config
+│   ├── colors.py
+│   └── notifications.json
+├── programs/                 Target definitions
+├── enumeration/              Passive subdomain discovery
+├── dns/                      Resolution + brute-force
+│   ├── wildcard/             Wildcard DNS test
+│   ├── static-brute/         Static wordlist
+│   ├── dynamic-brute/        dnsgen-based
+│   └── pattern-recognition/  Pattern permutations
+├── http/                     httpx probe
+├── cdn/                      cdncheck
+├── portscan/                 naabu
+├── vhost/                    Host header fuzzing
+├── whois/                    RDAP
+├── screenshot/               Playwright
+├── attack/nuclei/            Nuclei scanner
+├── notifications/            Telegram + Discord
+├── wordlist/                 Wordlists (subdomain, vhost, parameter)
+├── ui/                       Frontend
+│   ├── index.html
+│   ├── *.html                Page templates
+│   ├── old/                  Legacy pages
+│   └── static/
+│       ├── css/main.css      Design system
+│       ├── js/main.js        Shared helpers
+│       ├── js/*.js           Per-page scripts
+│       └── images/           Logos, icons
+└── database/                 Per-program JSON output
+    └── &lt;program&gt;/
+        ├── program.json
+        ├── enum-output/
+        ├── dns/
+        ├── http/
+        ├── cdn/
+        ├── portscan/
+        ├── vhost/
+        ├── whois/
+        ├── screenshots/
+        └── nuclei/</code></pre>
+        </section>
+
+        <!-- CONFIG -->
+        <section class="doc-section" id="config">
+          <h2>Configuration</h2>
+
+          <h3>Programs (<code>programs/*.json</code>)</h3>
+          <div class="doc-code-header">
+            <span>programs/example.json</span>
+            <button class="doc-code-copy" data-target="#code-program">Copy</button>
+          </div>
+          <pre class="doc-code" id="code-program"><code>{
+    "program_name": "example",
+    "scope": ["example.com", "example.org"],
+    "ooscope": ["out-of-scope.com"],
+    "cidr": ["192.0.2.0/24"],
+    "asn": ["AS15169"],
+    "ip": ["1.1.1.1"]
+}</code></pre>
+
+          <h3>Notifications (<code>configs/notifications.json</code>)</h3>
+          <div class="doc-code-header">
+            <span>configs/notifications.json</span>
+            <button class="doc-code-copy" data-target="#code-notif">Copy</button>
+          </div>
+          <pre class="doc-code" id="code-notif"><code>{
+    "telegram": {
+        "token": "...",
+        "chat_id": "-100...",
+        "enabled": true
+    },
+    "discord": {
+        "webhook_url": "...",
+        "enabled": false
+    },
+    "notifications": {
+        "new_subdomain": false,
+        "new_live_host": false,
+        "new_http_service": true,
+        "status_change": true
+    }
+}</code></pre>
+        </section>
+
+        <!-- TROUBLESHOOTING -->
+        <section class="doc-section" id="troubleshooting">
+          <h2>Troubleshooting</h2>
+
+          <h3>Pipeline fails silently</h3>
+          <p>
+            Check <code>database/&lt;program&gt;/log/logN.txt</code> for the latest run.
+            Each stage's stdout and stderr are captured there.
+          </p>
+
+          <h3>CDN detection says "Direct" for everything</h3>
+          <p>
+            Likely <code>cdncheck</code> failed to update and is missing ranges.
+            Run manually:
+          </p>
+          <div class="doc-code-header">
+            <span>bash</span>
+            <button class="doc-code-copy" data-target="#code-troubleshoot-1">Copy</button>
+          </div>
+          <pre class="doc-code" id="code-troubleshoot-1"><code>cdncheck -up
+cdncheck -i 1.1.1.1 -resp</code></pre>
+
+          <h3>Screenshots not captured</h3>
+          <p>
+            Playwright may not be installed. Fix:
+          </p>
+          <div class="doc-code-header">
+            <span>bash</span>
+            <button class="doc-code-copy" data-target="#code-troubleshoot-2">Copy</button>
+          </div>
+          <pre class="doc-code" id="code-troubleshoot-2"><code>pip install playwright
+playwright install chromium</code></pre>
+
+          <h3>Nuclei times out</h3>
+          <p>
+            Large URL lists can take hours. Use <code>--fresh</code> to only test
+            new URLs, or lower the rate limit in <code>attack/nuclei/watch_nuclei.py</code>.
+          </p>
+
+          <div class="doc-callout doc-callout-tip">
+            <p>
+              <strong>Tip:</strong> every module has a <code>--fresh</code> flag
+              (or a done-file) so re-runs skip what's already been processed.
+              You can safely run <code>watch.sh</code> as often as you want.
+            </p>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>WatchTower &copy; 2026 — Automated Reconnaissance Dashboard</p>
+    </div>
+  </footer>
+
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/help.js"></script>
+</body>
+</html>

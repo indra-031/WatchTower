@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WatchTower — Reconnaissance Dashboard</title>
+  <meta name="description" content="WatchTower — automated attack surface reconnaissance and monitoring.">
+
+  <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
+  <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+
+  <!-- ============ HEADER ============ -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="/" class="brand">
+        <svg class="brand-logo" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="brand-g" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#58a6ff"/>
+              <stop offset="1" stop-color="#bc8cff"/>
+            </linearGradient>
+          </defs>
+          <path d="M32 4 L56 14 L56 34 C56 48 44 58 32 62 C20 58 8 48 8 34 L8 14 Z"
+                stroke="url(#brand-g)" stroke-width="3" fill="none" stroke-linejoin="round"/>
+          <rect x="26" y="28" width="12" height="20" rx="2"
+                stroke="url(#brand-g)" stroke-width="3" fill="none"/>
+          <path d="M22 28 L42 28 L38 20 L26 20 Z"
+                stroke="url(#brand-g)" stroke-width="3" fill="none" stroke-linejoin="round"/>
+          <path d="M32 20 L32 12" stroke="url(#brand-g)" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="32" cy="10" r="2" fill="url(#brand-g)"/>
+        </svg>
+        <span class="brand-name">WatchTower</span>
+      </a>
+
+      <nav class="header-nav">
+        <a href="/programs">Programs</a>
+        <a href="/subdomains">Subdomains</a>
+        <a href="/attack">Attack</a>
+        <a href="/bookmark">Bookmarks</a>
+        <a href="/works">Works</a>
+        <a href="/help">Help</a>
+      </nav>
+
+      <div class="header-actions">
+        <span class="version-badge">v1.2</span>
+        <span class="live-dot" title="Live"></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ MAIN ============ -->
+  <main class="container">
+
+    <!-- Hero -->
+    <section class="hero">
+      <h1 class="hero-title">
+        <span id="greeting">Hello</span> — reconnaissance, automated.
+      </h1>
+      <p class="hero-subtitle">
+        <strong>WatchTower</strong> is a modular attack-surface recon pipeline:
+        subdomain discovery, DNS resolution, HTTP probing, CDN detection,
+        port scanning, virtual host discovery, WHOIS lookup, vulnerability
+        scanning — all written to plain JSON.
+      </p>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats-grid" aria-label="Live statistics">
+      <div class="stat-card">
+        <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        <div class="stat-value loading" id="stat-programs">{{ stats.programs }}</div>
+        <div class="stat-label">Programs</div>
+      </div>
+
+      <div class="stat-card">
+        <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/>
+        </svg>
+        <div class="stat-value loading" id="stat-subdomains">{{ stats.total_subdomains }}</div>
+        <div class="stat-label">Subdomains</div>
+      </div>
+
+      <div class="stat-card">
+        <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+        </svg>
+        <div class="stat-value loading" id="stat-lives">{{ stats.total_lives }}</div>
+        <div class="stat-label">Live Hosts</div>
+      </div>
+
+      <div class="stat-card">
+        <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/>
+        </svg>
+        <div class="stat-value loading" id="stat-http">{{ stats.total_http }}</div>
+        <div class="stat-label">HTTP Services</div>
+      </div>
+
+      <div class="stat-card">
+        <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
+        </svg>
+        <div class="stat-value" id="stat-whois">{{ stats.total_whois }}</div>
+        <div class="stat-label">WHOIS Records</div>
+      </div>
+
+      <div class="stat-card">
+        <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"/>
+          <path d="m21 21-4.35-4.35"/>
+        </svg>
+        <div class="stat-value loading" id="stat-nuclei">{{ stats.total_nuclei }}</div>
+        <div class="stat-label">Nuclei Findings</div>
+      </div>
+    </section>
+
+    <!-- Pipeline -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">Pipeline</h2>
+        <span class="section-subtitle">Sequential stages — each writes JSON to the database</span>
+      </div>
+      <div class="pipeline">
+        <span class="pipeline-step"><span class="pipeline-step-icon">📥</span>Sync</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step"><span class="pipeline-step-icon">🔎</span>Enum</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step"><span class="pipeline-step-icon">🎲</span>Wildcard</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step"><span class="pipeline-step-icon">🌍</span>DNS</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step"><span class="pipeline-step-icon">🌐</span>HTTP</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step"><span class="pipeline-step-icon">🛡️</span>CDN</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step"><span class="pipeline-step-icon">🔌</span>Ports</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step"><span class="pipeline-step-icon">🏛️</span>VHost</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step"><span class="pipeline-step-icon">📇</span>WHOIS</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step"><span class="pipeline-step-icon">📸</span>Screenshots</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step"><span class="pipeline-step-icon">🎯</span>Nuclei</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step"><span class="pipeline-step-icon">⚔️</span>Attack</span>
+      </div>
+    </section>
+
+    <!-- Navigation: Recon -->
+    <section class="nav-section">
+      <div class="nav-section-label">Reconnaissance</div>
+      <div class="nav-grid">
+        <a href="/programs" class="nav-card">
+          <div class="nav-card-header">
+            <div class="nav-card-icon">⚙️</div>
+            <div class="nav-card-title">Programs</div>
+          </div>
+          <div class="nav-card-desc">All monitored programs with their scopes, CIDRs, ASNs, and per-program statistics.</div>
+          <span class="nav-card-endpoint">GET /api/programs</span>
+        </a>
+
+        <a href="/subdomains" class="nav-card">
+          <div class="nav-card-header">
+            <div class="nav-card-icon">🌐</div>
+            <div class="nav-card-title">Subdomains</div>
+          </div>
+          <div class="nav-card-desc">Every discovered subdomain with source attribution, first-seen and last-seen timestamps.</div>
+          <span class="nav-card-endpoint">GET /api/subdomains</span>
+        </a>
+
+        <a href="/live-subdomains" class="nav-card">
+          <div class="nav-card-header">
+            <div class="nav-card-icon">💡</div>
+            <div class="nav-card-title">Live Hosts</div>
+          </div>
+          <div class="nav-card-desc">Subdomains confirmed alive via DNS resolution, with their resolved IP addresses.</div>
+          <span class="nav-card-endpoint">GET /api/lives</span>
+        </a>
+
+        <a href="/http-assets" class="nav-card">
+          <div class="nav-card-header">
+            <div class="nav-card-icon">📡</div>
+            <div class="nav-card-title">HTTP Services</div>
+          </div>
+          <div class="nav-card-desc">All HTTP/HTTPS services with status codes, titles, technologies, and web servers.</div>
+          <span class="nav-card-endpoint">GET /api/http</span>
+        </a>
+
+        <a href="/cdn" class="nav-card">
+          <div class="nav-card-header">
+            <div class="nav-card-icon">🛡️</div>
+            <div class="nav-card-title">CDN / Cloud / WAF</div>
+          </div>
+          <div class="nav-card-desc">Which hosts are behind a CDN, Cloud provider, or WAF — and which one.</div>
+          <span class="nav-card-endpoint">GET /api/cdn</span>
+        </a>
+
+        <a href="/portscan" class="nav-card">
+          <div class="nav-card-header">
+            <div class="nav-card-icon">🔌</div>
+            <div class="nav-card-title">Port Scan</div>
+          </div>
+          <div class="nav-card-desc">Open TCP ports per host with detected service names and versions.</div>
+          <span class="nav-card-endpoint">GET /api/portscan</span>
+        </a>
+
+        <a href="/vhost" class="nav-card">
+          <div class="nav-card-header">
+            <div class="nav-card-icon">🏛️</div>
+            <div class="nav-card-title">Virtual Hosts</div>
+          </div>
+          <div class="nav-card-desc">Hidden virtual hosts found on non-CDN IPs via Host-header fuzzing.</div>
+          <span class="nav-card-endpoint">GET /api/vhost</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Navigation: Fresh -->
+    <section class="nav-section">
+      <div class="nav-section-label">Fresh Data · last 24 hours</div>
+      <div class="nav-grid">
+        <a href="/fresh-subdomains" class="nav-card">
+          <div class="nav-card-header">
+            <div class="nav-card-icon">🆕</div>
+            <div class="nav-card-title">Fresh Subdomains</div>
+          </div>
+          <div class="nav-card-desc">Subdomains whose first_seen falls within the last 24 hours.</div>
+          <span class="nav-card-endpoint">GET /api/subdomains/fresh</span>
+        </a>
+
+        <a href="/fresh-http-assets" class="nav-card">
+          <div class="nav-card-header">
+            <div class="nav-card-icon">✨</div>
+            <div class="nav-card-title">Fresh HTTP Assets</div>
+          </div>
+          <div class="nav-card-desc">HTTP services observed within the last 24 hours.</div>
+          <span class="nav-card-endpoint">GET /api/http?fresh=1</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Navigation: Analysis -->
+    <section class="nav-section">
+      <div class="nav-section-label">Analysis</div>
+      <div class="nav-grid">
+        <a href="/whois" class="nav-card">
+          <div class="nav-card-header">
+            <div class="nav-card-icon">📇</div>
+            <div class="nav-card-title">WHOIS / RDAP</div>
+          </div>
+          <div class="nav-card-desc">Registration and network allocation data for every queried domain and IP.</div>
+          <span class="nav-card-endpoint">GET /api/whois</span>
+        </a>
+
+        <a href="/screenshots" class="nav-card">
+          <div class="nav-card-header">
+            <div class="nav-card-icon">📸</div>
+            <div class="nav-card-title">Screenshots</div>
+          </div>
+          <div class="nav-card-desc">Visual gallery of HTTP services captured with Playwright.</div>
+          <span class="nav-card-endpoint">GET /api/screenshots</span>
+        </a>
+
+        <a href="/advanced-search" class="nav-card">
+          <div class="nav-card-header">
+            <div class="nav-card-icon">🔎</div>
+            <div class="nav-card-title">Advanced Search</div>
+          </div>
+          <div class="nav-card-desc">Multi-filter view across subdomains, HTTP services, and Nuclei findings.</div>
+          <span class="nav-card-endpoint">GET /advanced-search</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Navigation: Attack -->
+    <section class="nav-section">
+      <div class="nav-section-label">Attack Surface</div>
+      <div class="nav-grid">
+        <a href="/attack" class="nav-card">
+          <div class="nav-card-header">
+            <div class="nav-card-icon">⚔️</div>
+            <div class="nav-card-title">Attack Modules</div>
+          </div>
+          <div class="nav-card-desc">Active security testing: Nuclei vulnerability scanning, plus future attack modules (Vecna, Amatrasu, Kusanagi, 404-Pager).</div>
+          <span class="nav-card-endpoint">/attack</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Navigation: Workspace -->
+    <section class="nav-section">
+      <div class="nav-section-label">Workspace</div>
+      <div class="nav-grid">
+        <a href="/bookmark" class="nav-card">
+          <div class="nav-card-header">
+            <div class="nav-card-icon">🔖</div>
+            <div class="nav-card-title">Bookmarks</div>
+          </div>
+          <div class="nav-card-desc">Manually curated targets across all programs — star any row to save it here.</div>
+          <span class="nav-card-endpoint">LocalStorage</span>
+        </a>
+
+        <a href="/works" class="nav-card">
+          <div class="nav-card-header">
+            <div class="nav-card-icon">📝</div>
+            <div class="nav-card-title">Works</div>
+          </div>
+          <div class="nav-card-desc">Your journal of what you've tested, found, and thought about each target. Free-text notes.</div>
+          <span class="nav-card-endpoint">LocalStorage</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Navigation: Utilities -->
+    <section class="nav-section">
+      <div class="nav-section-label">Utilities</div>
+      <div class="nav-grid">
+        <a href="/bruteforce" class="nav-card">
+          <div class="nav-card-header">
+            <div class="nav-card-icon">🔨</div>
+            <div class="nav-card-title">Bruteforce Subdomains</div>
+          </div>
+          <div class="nav-card-desc">Subdomains discovered only via DNS brute-force — no passive source found them.</div>
+          <span class="nav-card-endpoint">GET /api/bruteforce</span>
+        </a>
+
+        <a href="/out-of-scope" class="nav-card">
+          <div class="nav-card-header">
+            <div class="nav-card-icon">🚫</div>
+            <div class="nav-card-title">Out-of-Scope</div>
+          </div>
+          <div class="nav-card-desc">Targets explicitly excluded from each program. Do not test these assets.</div>
+          <span class="nav-card-endpoint">GET /api/programs</span>
+        </a>
+
+        <a href="/js" class="nav-card">
+          <div class="nav-card-header">
+            <div class="nav-card-icon">🟨</div>
+            <div class="nav-card-title">JS Analysis</div>
+          </div>
+          <div class="nav-card-desc">JavaScript discovery and endpoint extraction from live HTTP services.</div>
+          <span class="nav-card-endpoint">coming soon</span>
+        </a>
+
+        <a href="/help" class="nav-card">
+          <div class="nav-card-header">
+            <div class="nav-card-icon">❓</div>
+            <div class="nav-card-title">Help</div>
+          </div>
+          <div class="nav-card-desc">Complete guide to the pipeline, every module, and the REST API.</div>
+          <span class="nav-card-endpoint">GET /help</span>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="site-footer">
+    <div class="container">
+      <p>WatchTower &copy; 2026 — Automated Reconnaissance Dashboard</p>
+      <p class="text-mono text-muted" style="margin-top: 4px; font-size: 0.85em;">
+        File-based • No database • JSON-powered
+      </p>
+    </div>
+  </footer>
+
+  <script src="/static/js/main.js"></script>
+
+  <!-- WHOIS stat card fallback (main.js doesn't populate this one) -->
+  <script>
+    (function () {
+      var el = document.getElementById('stat-whois');
+      if (!el) return;
+      fetch('/api/stats')
+        .then(function (r) { return r.json(); })
+        .then(function (s) {
+          var v = (s && s.total_whois != null) ? s.total_whois : 0;
+          el.textContent = Number(v).toLocaleString();
+        })
+        .catch(function () { /* leave server-side value */ });
+    })();
+  </script>
+</body>
+</html>
