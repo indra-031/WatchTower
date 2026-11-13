@@ -1,0 +1,5 @@
+{
+    "chaos_api_key": "YOUR_CHAOS_API_KEY",
+    "abuseipdb_api_key": "YOUR_ABUSEIPDB_API_KEY",
+    "github_token": "YOUR_GITHUB_TOKEN"
+}

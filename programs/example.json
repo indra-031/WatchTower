@@ -1,0 +1,21 @@
+{
+    "program_name": "example",
+    "scope": [
+        "example.com",
+        "example.org"
+        ],
+    "out_of_scope": [
+        "x.example.com"
+    ],
+    "cidr": [
+        "192.0.2.0/24"
+    ],
+    "asn": [
+        "AS15169"
+    ],
+    "ip": [
+        "198.51.100.120"
+    ]
+}
+
+# use this example for your targets and save file in /programs/ and save as a json file like walmart.json

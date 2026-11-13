@@ -1,0 +1,30 @@
+{
+    "telegram": {
+        "token": "YOUR_TELEGRAM_BOT_TOKEN",
+        "chat_id": "YOUR_TELEGRAM_CHAT_ID",
+        "topic_id": null,
+        "enabled": false,
+        "timeout": 15,
+        "retries": 3,
+        "retry_backoff": 2,
+        "rate_limit": 0.5
+    },
+    "discord": {
+        "webhook_url": "YOUR_DISCORD_WEBHOOK_URL",
+        "enabled": false,
+        "timeout": 15,
+        "retries": 3,
+        "retry_backoff": 2,
+        "rate_limit": 0.5
+    },
+    "notifications": {
+        "new_subdomain": true,
+        "new_live_host": true,
+        "new_http_service": true,
+        "status_change": true,
+        "nuclei_finding": true,
+        "pipeline_start": true,
+        "pipeline_complete": true,
+        "errors": true
+    }
+}
