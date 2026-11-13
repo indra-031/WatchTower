@@ -1,0 +1,47 @@
+1. python watch_sync_programs.py
+
+2. python watch_enum_all.py
+
+3. python watch_wildcard_ns_test_all.py
+
+4. python watch_ns_all.py
+
+5. python watch_wordlist_all.py
+
+    if wildcard is true:
+        6. python watch_static_ns_brute_wildcard_all.py
+        7. python watch_dynamic_ns_brute_wildcard_all.py
+        8. python watch_pattern_recognition_wildcard_all.py
+
+    else:
+        6. python watch_static_ns_brute_all.py
+        7. python watch_dynamic_ns_brute_all.py
+        8. python watch_pattern_recognition_all.py
+
+9. python watch_filter_privates_ip_all.py
+
+10. python watch_http_all.py
+
+11. python watch_cdn_all.py
+
+12. python watch_whois_all.py
+
+13. python watch_portscan_all.py
+
+14. python watch_vhost_all.py
+
+15. python watch_js_enum_all.py
+
+16. python watch_screenshot_all.py
+
+
+
+
+
+
+
+# 17. attacks
+
+# ui works
+
+# add csp header subdomains enum, sublist3r, subcat
